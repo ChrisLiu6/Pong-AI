@@ -29,6 +29,7 @@ score_player = 0
 score_AI = 0
 num_alive = 0
 
+DRAW_LINES = True
 
 class Bar1:
     global BAR1_Y, BAR_CENTER
@@ -171,8 +172,13 @@ class Ball:
 def draw_window(win, bar1s, bar2, ball, score_player, score_AI, run):
     win.blit(IMG_BG, (-120, -200))
 
-    for bar1 in bar1s:
-        bar1.draw(win)
+    for bar in bar1s:
+        bar.draw(win)
+        if DRAW_LINES:
+            try:
+                pygame.draw.line(win, (255,0,0), (bar.x+bar.img.get_width()/2, bar.y + bar.img.get_height()/2), (ball.x+ball.img.get_width()/2, ball.y+ball.img.get_height()/2), 3)
+            except:
+                pass
 
     bar2.draw(win)
     ball.draw(win)
@@ -287,7 +293,7 @@ def main(genomes, config):
             ge[x].fitness += 0.01
             bar_center = bar.x+bar.img.get_width()/2
             # send bird location, top pipe location and bottom pipe location and determine from network whether to jump or not
-            output = nets[bar1s.index(bar)].activate((abs(bar_center - ball_center), abs(ball.y-BAR1_Y+bar.img.get_height())))
+            output = nets[bar1s.index(bar)].activate((abs(bar_center - ball_center), abs(ball.y+BAR1_Y+bar.img.get_height())))
 
             if output[0] > 0.3:  # tanh activation function
                 bar.move_left()
