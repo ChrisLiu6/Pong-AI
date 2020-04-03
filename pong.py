@@ -2,7 +2,6 @@ import pygame
 import os
 import neat
 import random
-import sys
 
 pygame.font.init()
 pygame.mixer.init()
