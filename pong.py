@@ -1,25 +1,34 @@
 import pygame
-import time
 import os
 import neat
 import random
+import sys
 
 pygame.font.init()
-STAT_FONT = pygame.font.SysFont('comicsans', 30)
+pygame.mixer.init()
 
-WIN_WIDTH = 600
+STAT_FONT = pygame.font.SysFont('comicsans', 20)
+BIG_FONT = pygame.font.SysFont('comicsans', 60)
+
+WIN_WIDTH = 615
 WIN_HEIGHT = 700
-BAR1_Y = 10
-BAR2_Y = WIN_HEIGHT - 20
+BAR1_Y = 0
+BAR2_Y = WIN_HEIGHT - 10
 BAR_CENTER = int(WIN_WIDTH/2) - 50
 
-BALL_VEL = 16
+BALL_VEL = 20
 BALL_VEL_X = int(BALL_VEL*28/40)
 BALL_VEL_Y = int(BALL_VEL)
 
 IMG_BAR = pygame.image.load(os.path.join('imgs', 'bar.png'))
-IMG_BG = pygame.image.load(os.path.join('imgs', 'osu.png'))
+IMG_BG = pygame.image.load(os.path.join('imgs', 'osu2.png'))
 IMG_BALL = pygame.image.load(os.path.join('imgs', 'ball2.png'))
+
+pygame.mixer.music.load(os.path.join('sound', 'bomb.mp3'))
+pygame.mixer.music.play(-1)
+
+SOUND1 = pygame.mixer.Sound(os.path.join('sound', 'click.wav'))
+SOUND2 = pygame.mixer.Sound(os.path.join('sound', 'noice.wav'))
 
 WIN = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption("Pong AI")
@@ -29,12 +38,12 @@ score_player = 0
 score_AI = 0
 num_alive = 0
 
-DRAW_LINES = True
+DRAW_LINES = False
 
 class Bar1:
-    global BAR1_Y, BAR_CENTER
+    global BAR1_Y, BAR_CENTER, BALL_VEL
     img = IMG_BAR
-    VEL = 18
+    VEL = int(BALL_VEL*1.1)
 
     def __init__(self, x, y):
         self.x = x
@@ -47,23 +56,23 @@ class Bar1:
     def move_left(self):
         self.x -= self.VEL
 
-        if self.x <= 10:
-            self.x = 10
+        if self.x <= 0:
+            self.x = 0
 
     def move_right(self):
         self.x += self.VEL
 
-        if self.x + self.img.get_width() >= WIN_WIDTH - 10:
-            self.x = WIN_WIDTH - 10 - self.img.get_width()
+        if self.x + self.img.get_width() >= WIN_WIDTH:
+            self.x = WIN_WIDTH - self.img.get_width()
 
     def get_mask(self):
         return pygame.mask.from_surface(self.img)
 
 
 class Bar2:
-    global BAR2_Y, BAR_CENTER
+    global BAR2_Y, BAR_CENTER, BALL_VEL
     img = IMG_BAR
-    VEL = 12
+    VEL = int(BALL_VEL)
 
     def __init__(self):
         self.x = BAR_CENTER
@@ -76,10 +85,10 @@ class Bar2:
     def move(self):
         self.x += self.VEL*self.dir_x
 
-        if self.x <= 10:
-            self.x = 10
-        if self.x + self.img.get_width() >= WIN_WIDTH - 10:
-            self.x = WIN_WIDTH - 10 - self.img.get_width()
+        if self.x <= 0:
+            self.x = 0
+        if self.x + self.img.get_width() >= WIN_WIDTH:
+            self.x = WIN_WIDTH - self.img.get_width()
 
     def get_mask(self):
         return pygame.mask.from_surface(self.img)
@@ -132,7 +141,7 @@ class Ball:
         bar2_mask = bar2.get_mask()
         ball_mask = pygame.mask.from_surface(self.img)
 
-        bar2_offset = (self.x - bar2.x, self.y - round(bar2.y))
+        bar2_offset = (round(self.x-bar2.x), round(self.y+self.img.get_height()/2-bar2.y))
         bar2_overlap = bar2_mask.overlap(ball_mask, bar2_offset)
 
         if bar2_overlap:
@@ -176,37 +185,48 @@ def draw_window(win, bar1s, bar2, ball, score_player, score_AI, run):
         bar.draw(win)
         if DRAW_LINES:
             try:
-                pygame.draw.line(win, (255,0,0), (bar.x+bar.img.get_width()/2, bar.y + bar.img.get_height()/2), (ball.x+ball.img.get_width()/2, ball.y+ball.img.get_height()/2), 3)
+                pygame.draw.line(win, (100, 250, 100), (bar.x+bar.img.get_width()/2, bar.y + bar.img.get_height() / 2),
+                                 (ball.x + ball.img.get_width() / 2, ball.y + ball.img.get_height() / 2), 1)
             except:
                 pass
 
     bar2.draw(win)
     ball.draw(win)
 
+    # generations
+    score_label = STAT_FONT.render("Gens: " + str(gen-1),1,(255,255,0))
+    win.blit(score_label, (10, 30))
+
+    # alive
+    num_alive = STAT_FONT.render("Alive: " + str(len(bar1s)), 1, (255, 255, 0))
+    win.blit(num_alive, (10, 50))
+
     # score
     score_label_player = STAT_FONT.render("Player Score: " + str(score_player), 1, (255, 255, 255))
     score_label_AI = STAT_FONT.render("AI Score: " + str(score_AI), 1, (255, 255, 255))
-    win.blit(score_label_player, (10, 400))
-    win.blit(score_label_AI, (10, 430))
+    win.blit(score_label_player, (10, 70))
+    win.blit(score_label_AI, (10, 90))
 
-    # generations
-    score_label = STAT_FONT.render("Gens: " + str(gen-1),1,(255,255,255))
-    win.blit(score_label, (10, 300))
+    # Controls
+    c1 = STAT_FONT.render('Control Keys:', 1, (255, 255, 255))
+    c2 = STAT_FONT.render('A: Left', 1, (255, 255, 255))
+    c3 = STAT_FONT.render('D: Right', 1, (255, 255, 255))
+    c4 = STAT_FONT.render('L: Draw Lines', 1, (255, 255, 255))
+    win.blit(c1, (500, 30))
+    win.blit(c2, (500, 50))
+    win.blit(c3, (500, 70))
+    win.blit(c4, (500, 90))
 
-    # alive
-    num_alive = STAT_FONT.render("Alive: " + str(len(bar1s)), 1, (255, 255, 255))
-    win.blit(num_alive, (10, 330))
-
-    # press G to start
+    # press key to start
     if not run:
-        text = STAT_FONT.render("Press G to Start! ", 1, (255, 255, 255))
-        win.blit(text, (215, 300))
+        text = BIG_FONT.render("Press ANY KEY to Start! ", 1, (0, 255, 0))
+        win.blit(text, (75, 330))
 
     pygame.display.update()
 
 
 def main(genomes, config):
-    global WIN, gen, score_player, score_AI, num_alive
+    global WIN, gen, score_player, score_AI, num_alive, DRAW_LINES
     gen += 1
     clock = pygame.time.Clock()
 
@@ -218,8 +238,8 @@ def main(genomes, config):
     ge = []
     bar2 = Bar2()
     ball = Ball()
-    bar1_remove = []
     run = False
+    twitch = 0
 
     for _, g in genomes:
         g.fitness = 0
@@ -236,12 +256,14 @@ def main(genomes, config):
         ball.x = bar2.x + int(bar2.img.get_width()/2) - int(ball.img.get_width()/2)
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_g:
-                    run = True
                 if event.key == pygame.K_a:
                     bar2.dir_x = -1
                 elif event.key == pygame.K_d:
                     bar2.dir_x = 1
+                elif event.key == pygame.K_l:
+                    DRAW_LINES = False if DRAW_LINES else True
+                else:
+                    run = True
             else:
                 bar2.dir_x = 0
 
@@ -264,20 +286,19 @@ def main(genomes, config):
             if ball.collide_bar1(bar1s):
                 bar1_remove = ball.collide_check_bar1(bar1s)
 
-        for bar in bar1_remove:
-            ge[bar1s.index(bar)].fitness -= 1
-            ge[bar1s.index(bar)].fitness += 1-0.002 * abs(bar.x + bar.img.get_width() / 2 - ball_center)
-            nets.pop(bar1s.index(bar))
-            ge.pop(bar1s.index(bar))
-            bar1s.pop(bar1s.index(bar))
+                for bar in bar1_remove:
+                    ge[bar1s.index(bar)].fitness -= (5 + 0.01 * abs(bar.x + bar.img.get_width() / 2 - ball_center))
+                    nets.pop(bar1s.index(bar))
+                    ge.pop(bar1s.index(bar))
+                    bar1s.pop(bar1s.index(bar))
 
-        for bar in bar1s:
-            ge[bar1s.index(bar)].fitness += 1
+                for bar in bar1s:
+                    ge[bar1s.index(bar)].fitness += 30-0.01 * abs(bar.x + bar.img.get_width() / 2 - ball_center)
 
-        bar1_remove.clear()
+                bar1_remove.clear()
 
         if ball.collide_y_top():
-            ge[bar1s.index(bar)].fitness -= 11
+            ge[bar1s.index(bar)].fitness -= (5 + 0.01 * abs(bar.x + bar.img.get_width() / 2 - ball_center))
             bar1s.clear()
             nets.clear()
             ge.clear()
@@ -290,22 +311,30 @@ def main(genomes, config):
             score_AI += 1
 
         for x, bar in enumerate(bar1s):  # give each bird a fitness of 0.1 for each frame it stays alive
-            ge[x].fitness += 0.01
             bar_center = bar.x+bar.img.get_width()/2
             # send bird location, top pipe location and bottom pipe location and determine from network whether to jump or not
-            output = nets[bar1s.index(bar)].activate((abs(bar_center - ball_center), abs(ball.y+BAR1_Y+bar.img.get_height())))
+            #output = nets[bar1s.index(bar)].activate((bar_center - ball_center, abs(ball.y-(BAR1_Y+bar.img.get_height())), ball.dir_y))
+            output = nets[bar1s.index(bar)].activate((ball_center, bar.x-ball_center, bar.x+bar.img.get_width()-ball_center, ball.y - (bar.y+bar.img.get_height())))
 
-            if output[0] > 0.3:  # tanh activation function
+            if output[0] > 0.6:  # tanh activation function
                 bar.move_left()
-            if output[1] > 0.3:
+                if twitch == 1:
+                    ge[bar1s.index(bar)].fitness -= 0.01
+                twitch = 0
+            if output[1] > 0.6:
                 bar.move_right()
+                if twitch == 0:
+                    ge[bar1s.index(bar)].fitness -= 0.01
+                twitch = 1
 
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
                     bar2.dir_x = -1
-                if event.key == pygame.K_d:
+                elif event.key == pygame.K_d:
                     bar2.dir_x = 1
+                elif event.key == pygame.K_l:
+                    DRAW_LINES = False if DRAW_LINES else True
             else:
                 bar2.dir_x = 0
 
