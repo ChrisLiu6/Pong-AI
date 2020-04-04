@@ -15,6 +15,7 @@ STAT_FONT = pygame.font.SysFont('comicsans', 20)
 BIG_FONT = pygame.font.SysFont('comicsans', 50, italic=True, bold=True)
 NAME_FONT1 = pygame.font.SysFont('comicsans', 30, italic=False)
 NAME_FONT2 = pygame.font.SysFont('comicsans', 15, italic=True)
+NAME_FONT3 = pygame.font.SysFont('comicsans', 20, italic=True)
 
 WIN_WIDTH = 615
 WIN_HEIGHT = 700
@@ -205,8 +206,8 @@ def draw_window(win, bar1s, bar2, ball, score_player, score_AI, run):
     win.blit(num_alive, (10, 50))
 
     # score
-    score_label_player = STAT_FONT.render("Player Score: " + str(score_player), 1, (0, 255, 255))
-    score_label_AI = STAT_FONT.render("AI Score: " + str(score_AI), 1, (0, 255, 255))
+    score_label_player = STAT_FONT.render("Player Score: " + str(score_player), 1, (255, 255, 255))
+    score_label_AI = STAT_FONT.render("AI Score: " + str(score_AI), 1, (255, 255, 255))
     win.blit(score_label_player, (10, 70))
     win.blit(score_label_AI, (10, 90))
 
@@ -224,6 +225,12 @@ def draw_window(win, bar1s, bar2, ball, score_player, score_AI, run):
         win.blit(c2, (500, 50))
         win.blit(c3, (500, 70))
         win.blit(c4, (500, 90))
+
+        # Players
+        p1 = NAME_FONT3.render('You', 1, (0, 255, 255))
+        p2 = NAME_FONT3.render('AI (They are evolving)', 1, (0, 255, 255))
+        win.blit(p1, (310, 640))
+        win.blit(p2, (310, 30))
 
     # Game name:
     logo = NAME_FONT1.render("Pong.AI", 1, (255, 255, 255))
