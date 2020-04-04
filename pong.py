@@ -228,8 +228,8 @@ def draw_window(win, bar1s, bar2, ball, score_player, score_AI, run):
 
         # Players
         p1 = NAME_FONT3.render('You', 1, (0, 255, 255))
-        p2 = NAME_FONT3.render('AI (They are evolving)', 1, (0, 255, 255))
-        win.blit(p1, (310, 640))
+        p2 = NAME_FONT3.render('Evolving AI', 1, (0, 255, 255))
+        win.blit(p1, (ball.x+30, 640))
         win.blit(p2, (310, 30))
 
     # Game name:
