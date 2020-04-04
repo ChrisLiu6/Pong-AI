@@ -6,32 +6,31 @@ import random
 pygame.font.init()
 pygame.mixer.init()
 
+# Game Speed
+BALL_VEL = 20
+BALL_VEL_X = int(BALL_VEL * 28 / 40)
+BALL_VEL_Y = int(BALL_VEL)
+
 STAT_FONT = pygame.font.SysFont('comicsans', 20)
-BIG_FONT = pygame.font.SysFont('comicsans', 60)
+BIG_FONT = pygame.font.SysFont('comicsans', 50, italic=True, bold=True)
+NAME_FONT1 = pygame.font.SysFont('comicsans', 30, italic=False)
+NAME_FONT2 = pygame.font.SysFont('comicsans', 15, italic=True)
 
 WIN_WIDTH = 615
 WIN_HEIGHT = 700
-BAR1_Y = 10
+BAR1_Y = 0
 BAR2_Y = WIN_HEIGHT - 10
-BAR_CENTER = int(WIN_WIDTH/2) - 50
-
-BALL_VEL = 24
-BALL_VEL_X = int(BALL_VEL*28/40)
-BALL_VEL_Y = int(BALL_VEL)
+BAR_CENTER = int(WIN_WIDTH / 2) - 50
 
 IMG_BAR = pygame.image.load(os.path.join('imgs', 'bar.png'))
 IMG_BG = pygame.image.load(os.path.join('imgs', 'osu2.png'))
 IMG_BALL = pygame.image.load(os.path.join('imgs', 'ball2.png'))
 
-#pygame.mixer.music.load(os.path.join('sound', 'bomb.mp3'))
-pygame.mixer.music.load(os.path.join('sound', 'Megalovania.mp3'))
+pygame.mixer.music.load(os.path.join('sound', 'bomb.mp3'))
 pygame.mixer.music.play(-1)
 
-SOUND1 = pygame.mixer.Sound(os.path.join('sound', 'click.wav'))
-SOUND2 = pygame.mixer.Sound(os.path.join('sound', 'noice.wav'))
-
 WIN = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
-pygame.display.set_caption("Pong AI")
+pygame.display.set_caption("Pong.AI")
 
 gen = 0
 score_player = 0
@@ -44,7 +43,7 @@ DRAW_LINES = True
 class Bar1:
     global BAR1_Y, BAR_CENTER, BALL_VEL
     img = IMG_BAR
-    VEL = int(BALL_VEL*1.1)
+    VEL = int(BALL_VEL * 1.1)
 
     def __init__(self, x, y):
         self.x = x
@@ -84,7 +83,7 @@ class Bar2:
         win.blit(self.img, (self.x, self.y))
 
     def move(self):
-        self.x += self.VEL*self.dir_x
+        self.x += self.VEL * self.dir_x
 
         if self.x <= 0:
             self.x = 0
@@ -104,7 +103,7 @@ class Ball:
         self.y = BAR2_Y - 25
         self.vel_x = 0
         self.vel_y = 0
-        self.dir_x = random.randint(0, 1)*2-1
+        self.dir_x = random.randint(0, 1) * 2 - 1
         self.dir_y = -1
 
     def move(self):
@@ -142,7 +141,7 @@ class Ball:
         bar2_mask = bar2.get_mask()
         ball_mask = pygame.mask.from_surface(self.img)
 
-        bar2_offset = (round(self.x-bar2.x), round(self.y+self.img.get_height()/2-bar2.y))
+        bar2_offset = (round(self.x - bar2.x), round(self.y + self.img.get_height() / 2 - bar2.y))
         bar2_overlap = bar2_mask.overlap(ball_mask, bar2_offset)
 
         if bar2_overlap:
@@ -180,22 +179,25 @@ class Ball:
 
 
 def draw_window(win, bar1s, bar2, ball, score_player, score_AI, run):
-    win.blit(IMG_BG, (-120, -200))
+    # Background
+    win.blit(IMG_BG, (-110, -200))
 
+    # Bar 1 and lines
     for bar in bar1s:
         bar.draw(win)
         if DRAW_LINES:
-            try:
-                pygame.draw.line(win, (100, 250, 100), (bar.x+bar.img.get_width()/2, bar.y + bar.img.get_height() / 2),
+            pygame.draw.line(win, (100, 250, 100),
+                                 (bar.x + bar.img.get_width() / 2, bar.y + bar.img.get_height() / 2),
                                  (ball.x + ball.img.get_width() / 2, ball.y + ball.img.get_height() / 2), 1)
-            except:
-                pass
 
+    # Bar 2
     bar2.draw(win)
+
+    # Ball
     ball.draw(win)
 
     # generations
-    score_label = STAT_FONT.render("Gens: " + str(gen-1),1,(255,255,0))
+    score_label = STAT_FONT.render("Gens: " + str(gen - 1), 1, (255, 255, 0))
     win.blit(score_label, (10, 30))
 
     # alive
@@ -203,25 +205,31 @@ def draw_window(win, bar1s, bar2, ball, score_player, score_AI, run):
     win.blit(num_alive, (10, 50))
 
     # score
-    score_label_player = STAT_FONT.render("Player Score: " + str(score_player), 1, (255, 255, 255))
-    score_label_AI = STAT_FONT.render("AI Score: " + str(score_AI), 1, (255, 255, 255))
+    score_label_player = STAT_FONT.render("Player Score: " + str(score_player), 1, (0, 255, 255))
+    score_label_AI = STAT_FONT.render("AI Score: " + str(score_AI), 1, (0, 255, 255))
     win.blit(score_label_player, (10, 70))
     win.blit(score_label_AI, (10, 90))
 
-    # Controls
-    c1 = STAT_FONT.render('Control Keys:', 1, (255, 255, 255))
-    c2 = STAT_FONT.render('A: Left', 1, (255, 255, 255))
-    c3 = STAT_FONT.render('D: Right', 1, (255, 255, 255))
-    c4 = STAT_FONT.render('L: Draw Lines', 1, (255, 255, 255))
-    win.blit(c1, (500, 30))
-    win.blit(c2, (500, 50))
-    win.blit(c3, (500, 70))
-    win.blit(c4, (500, 90))
-
-    # press key to start
     if not run:
-        text = BIG_FONT.render("Press ANY KEY to Start! ", 1, (0, 255, 0))
-        win.blit(text, (75, 330))
+        # press key to start
+        text = BIG_FONT.render("Press Any Key to Start! ", 1, (0, 255, 0))
+        win.blit(text, (80, 330))
+
+        # Controls
+        c1 = STAT_FONT.render('Control Keys:', 1, (255, 255, 0))
+        c2 = STAT_FONT.render('A: Left', 1, (255, 255, 255))
+        c3 = STAT_FONT.render('D: Right', 1, (255, 255, 255))
+        c4 = STAT_FONT.render('L: Toggle Lines', 1, (255, 255, 255))
+        win.blit(c1, (500, 30))
+        win.blit(c2, (500, 50))
+        win.blit(c3, (500, 70))
+        win.blit(c4, (500, 90))
+
+    # Game name:
+    logo = NAME_FONT1.render("Pong.AI", 1, (255, 255, 255))
+    name = NAME_FONT2.render("A Boring Game", 1, (255, 255, 255))
+    win.blit(logo, (480, 580))
+    win.blit(name, (480, 605))
 
     pygame.display.update()
 
@@ -251,10 +259,11 @@ def main(genomes, config):
 
     draw_window(WIN, bar1s, bar2, ball, score_player, score_AI, run)
 
+    # Start Manue
     while not run:
         draw_window(WIN, bar1s, bar2, ball, score_player, score_AI, run)
         bar2.move()
-        ball.x = bar2.x + int(bar2.img.get_width()/2) - int(ball.img.get_width()/2)
+        ball.x = bar2.x + int(bar2.img.get_width() / 2) - int(ball.img.get_width() / 2)
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
@@ -274,6 +283,7 @@ def main(genomes, config):
                 quit()
                 break
 
+    # Main Loop
     while run and len(bar1s) > 0:
         clock.tick(100)
         ball_center = ball.x + ball.img.get_width() / 2
@@ -288,17 +298,20 @@ def main(genomes, config):
                 bar1_remove = ball.collide_check_bar1(bar1s)
 
                 for bar in bar1_remove:
+                    # Decrease fitness if die and being far away from ball
                     ge[bar1s.index(bar)].fitness -= (5 + 0.01 * abs(bar.x + bar.img.get_width() / 2 - ball_center))
                     nets.pop(bar1s.index(bar))
                     ge.pop(bar1s.index(bar))
                     bar1s.pop(bar1s.index(bar))
 
                 for bar in bar1s:
-                    ge[bar1s.index(bar)].fitness += 30-0.01 * abs(bar.x + bar.img.get_width() / 2 - ball_center)
+                    # Increase fitness for hitting ball and being close
+                    ge[bar1s.index(bar)].fitness += 30 - 0.01 * abs(bar.x + bar.img.get_width() / 2 - ball_center)
 
                 bar1_remove.clear()
 
         if ball.collide_y_top():
+            # Decrease fitness if die and being far away from ball
             ge[bar1s.index(bar)].fitness -= (5 + 0.01 * abs(bar.x + bar.img.get_width() / 2 - ball_center))
             bar1s.clear()
             nets.clear()
@@ -311,21 +324,22 @@ def main(genomes, config):
             ge.clear()
             score_AI += 1
 
-        for x, bar in enumerate(bar1s):  # give each bird a fitness of 0.1 for each frame it stays alive
-            bar_center = bar.x+bar.img.get_width()/2
-            # send bird location, top pipe location and bottom pipe location and determine from network whether to jump or not
-            #output = nets[bar1s.index(bar)].activate((bar_center - ball_center, abs(ball.y-(BAR1_Y+bar.img.get_height())), ball.dir_y))
-            output = nets[bar1s.index(bar)].activate((ball_center, bar.x-ball_center, bar.x+bar.img.get_width()-ball_center, \
-                                                      ball.y - (bar.y+bar.img.get_height()), ball.dir_y))
+        for x, bar in enumerate(bar1s):
+            # NN Inputs
+            output = nets[bar1s.index(bar)].activate((ball_center, bar.x - ball_center, \
+                                                      bar.x + bar.img.get_width() - ball_center, \
+                                                      ball.y - (bar.y + bar.img.get_height()), ball.dir_y))
 
-            if output[0] > 0.6:  # tanh activation function
+            if output[0] > 0.6:
                 bar.move_left()
                 if twitch == 1:
+                    # Punish bar twitching for better visual
                     ge[bar1s.index(bar)].fitness -= 0.01
                 twitch = 0
             if output[1] > 0.6:
                 bar.move_right()
                 if twitch == 0:
+                    # Punish bar twitching for better visual
                     ge[bar1s.index(bar)].fitness -= 0.01
                 twitch = 1
 
