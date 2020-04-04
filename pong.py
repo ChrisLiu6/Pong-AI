@@ -23,8 +23,8 @@ IMG_BAR = pygame.image.load(os.path.join('imgs', 'bar.png'))
 IMG_BG = pygame.image.load(os.path.join('imgs', 'osu2.png'))
 IMG_BALL = pygame.image.load(os.path.join('imgs', 'ball2.png'))
 
-pygame.mixer.music.load(os.path.join('sound', 'bomb.mp3'))
-#pygame.mixer.music.load(os.path.join('sound', 'Megalovania.mp3'))
+#pygame.mixer.music.load(os.path.join('sound', 'bomb.mp3'))
+pygame.mixer.music.load(os.path.join('sound', 'Megalovania.mp3'))
 pygame.mixer.music.play(-1)
 
 SOUND1 = pygame.mixer.Sound(os.path.join('sound', 'click.wav'))
