@@ -14,7 +14,7 @@ BALL_VEL_Y = int(BALL_VEL)
 STAT_FONT = pygame.font.SysFont('comicsans', 20)
 BIG_FONT = pygame.font.SysFont('comicsans', 50, italic=True, bold=True)
 NAME_FONT1 = pygame.font.SysFont('comicsans', 30, italic=False)
-NAME_FONT2 = pygame.font.SysFont('comicsans', 15, italic=True)
+NAME_FONT2 = pygame.font.SysFont('comicsans', 14, italic=True)
 NAME_FONT3 = pygame.font.SysFont('comicsans', 20, italic=True)
 
 WIN_WIDTH = 615
@@ -73,7 +73,7 @@ class Bar1:
 class Bar2:
     global BAR2_Y, BAR_CENTER, BALL_VEL
     img = IMG_BAR
-    VEL = int(BALL_VEL)
+    VEL = BALL_VEL
 
     def __init__(self):
         self.x = BAR_CENTER
@@ -234,9 +234,9 @@ def draw_window(win, bar1s, bar2, ball, score_player, score_AI, run):
 
     # Game name:
     logo = NAME_FONT1.render("Pong.AI", 1, (255, 255, 255))
-    name = NAME_FONT2.render("A Boring Game", 1, (255, 255, 255))
-    win.blit(logo, (480, 580))
-    win.blit(name, (480, 605))
+    name = NAME_FONT2.render("A Boring Game Made Impossible", 1, (255, 255, 255))
+    win.blit(logo, (490, 590))
+    win.blit(name, (450, 615))
 
     pygame.display.update()
 
