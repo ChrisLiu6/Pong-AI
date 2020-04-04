@@ -5,6 +5,6 @@ Install:
 2. $ pip3 install pygame
 
 How to Play:
-1. run pong.py
+1. Run pong.py
 2. Turn up volume
 3. Have fun!
