@@ -11,11 +11,11 @@ BIG_FONT = pygame.font.SysFont('comicsans', 60)
 
 WIN_WIDTH = 615
 WIN_HEIGHT = 700
-BAR1_Y = 0
+BAR1_Y = 10
 BAR2_Y = WIN_HEIGHT - 10
 BAR_CENTER = int(WIN_WIDTH/2) - 50
 
-BALL_VEL = 20
+BALL_VEL = 24
 BALL_VEL_X = int(BALL_VEL*28/40)
 BALL_VEL_Y = int(BALL_VEL)
 
@@ -24,6 +24,7 @@ IMG_BG = pygame.image.load(os.path.join('imgs', 'osu2.png'))
 IMG_BALL = pygame.image.load(os.path.join('imgs', 'ball2.png'))
 
 pygame.mixer.music.load(os.path.join('sound', 'bomb.mp3'))
+#pygame.mixer.music.load(os.path.join('sound', 'Megalovania.mp3'))
 pygame.mixer.music.play(-1)
 
 SOUND1 = pygame.mixer.Sound(os.path.join('sound', 'click.wav'))
@@ -37,7 +38,8 @@ score_player = 0
 score_AI = 0
 num_alive = 0
 
-DRAW_LINES = False
+DRAW_LINES = True
+
 
 class Bar1:
     global BAR1_Y, BAR_CENTER, BALL_VEL
@@ -313,7 +315,8 @@ def main(genomes, config):
             bar_center = bar.x+bar.img.get_width()/2
             # send bird location, top pipe location and bottom pipe location and determine from network whether to jump or not
             #output = nets[bar1s.index(bar)].activate((bar_center - ball_center, abs(ball.y-(BAR1_Y+bar.img.get_height())), ball.dir_y))
-            output = nets[bar1s.index(bar)].activate((ball_center, bar.x-ball_center, bar.x+bar.img.get_width()-ball_center, ball.y - (bar.y+bar.img.get_height())))
+            output = nets[bar1s.index(bar)].activate((ball_center, bar.x-ball_center, bar.x+bar.img.get_width()-ball_center, \
+                                                      ball.y - (bar.y+bar.img.get_height()), ball.dir_y))
 
             if output[0] > 0.6:  # tanh activation function
                 bar.move_left()
