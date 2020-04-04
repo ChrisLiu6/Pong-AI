@@ -6,4 +6,5 @@ Install:
 
 How to Play:
 1. run pong.py
-2. Have fun!
+2. Turn up volume
+3. Have fun!
