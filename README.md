@@ -1,5 +1,5 @@
 Game of Pong vs Learning AI
-
+![Screen Shot](imgs/screenshots/menu.png)
 Install:
 1. Download files
 2. $ pip3 install neat-python
